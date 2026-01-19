@@ -17,6 +17,6 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
-import userRoutes from "../routes/user.routes.js";
+import userRoutes from "../src/routes/user.routes.js";
 app.use("WearSuggest/v1/user", userRoutes);
 export { app };
