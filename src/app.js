@@ -18,5 +18,5 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 import userRoutes from "../src/routes/user.routes.js";
-app.use("WearSuggest/v1/user", userRoutes);
+app.use("/WearSuggest/v1/user", userRoutes);
 export { app };
