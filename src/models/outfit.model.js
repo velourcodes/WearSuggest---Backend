@@ -20,13 +20,21 @@ const outfitSchema = new mongoose.Schema(
       ref: "ClothingItem",
       required: true
     },
+    footwear: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ClothingItem"
+    },
+    outerwear: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ClothingItem"
+    },
     accessories: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "ClothingItem"
       }
     ],
-    
+
     lastWornAt: {
       type: Date,
       index: true
@@ -41,4 +49,4 @@ outfitSchema.index(
   { unique: true }
 );
 
-export const Outfit =  mongoose.model("Outfit", outfitSchema);
+export const Outfit = mongoose.model("Outfit", outfitSchema);

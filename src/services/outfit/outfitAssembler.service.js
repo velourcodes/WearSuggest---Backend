@@ -67,6 +67,8 @@ export const generateOutfit = async ({ userId, occasion, season }) => {
     if (recentlyWorn) continue;
 
     const selectedAccessories = pickRandomAccessories(accessories);
+    const selectedFootwear = pickRandom(footwear);
+    const selectedOuterwear = outerwear.length ? pickRandom(outerwear) : null;
 
     // 5️⃣ Save / update outfit usage
     await Outfit.findOneAndUpdate(
@@ -78,29 +80,32 @@ export const generateOutfit = async ({ userId, occasion, season }) => {
       {
         $set: {
           lastWornAt: now,
-          accessories: selectedAccessories.map(a => a._id), 
-
+          accessories: selectedAccessories.map(a => a._id),
+          footwear: selectedFootwear._id,
+          outerwear: selectedOuterwear ? selectedOuterwear._id : null
         },
-        
+
       },
       {
         upsert: true,
         new: true,
       }
     );
-   
 
     return {
       top: pair.top,
       bottom: pair.bottom,
-      footwear: pickRandom(footwear),
-      outerwear: outerwear.length ? pickRandom(outerwear) : null,
+      footwear: selectedFootwear,
+      outerwear: selectedOuterwear,
       accessories: selectedAccessories
     };
   }
 
   // 6️⃣ Fallback (only one possible outfit)
   const fallback = validPairs[0];
+  const fallbackAccessories = pickRandomAccessories(accessories);
+  const fallbackFootwear = pickRandom(footwear);
+  const fallbackOuterwear = outerwear.length ? pickRandom(outerwear) : null;
 
   await Outfit.findOneAndUpdate(
     {
@@ -109,7 +114,12 @@ export const generateOutfit = async ({ userId, occasion, season }) => {
       bottom: fallback.bottom._id,
     },
     {
-      $set: { lastWornAt: now },
+      $set: {
+        lastWornAt: now,
+        accessories: fallbackAccessories.map(a => a._id),
+        footwear: fallbackFootwear._id,
+        outerwear: fallbackOuterwear ? fallbackOuterwear._id : null
+      },
     },
     { upsert: true }
   );
@@ -117,8 +127,9 @@ export const generateOutfit = async ({ userId, occasion, season }) => {
   return {
     top: fallback.top,
     bottom: fallback.bottom,
-    footwear: pickRandom(footwear),
-    outerwear: outerwear.length ? pickRandom(outerwear) : null,
+    footwear: fallbackFootwear,
+    outerwear: fallbackOuterwear,
+    accessories: fallbackAccessories,
     note: "Only one possible outfit available",
   };
 };

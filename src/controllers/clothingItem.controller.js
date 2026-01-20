@@ -44,29 +44,21 @@ const addClothingItem = asyncHandler(async (req, res) => {
   season = normalizeToArray(season);
   occasion = normalizeToArray(occasion);
 
-  // 5️⃣ FORCE RULE FOR ACCESSORIES
-  if (type === "accessory") {
-    season = [];
-    occasion = [];
+  // 5️⃣ VALIDATION
+  if (!season.length || !occasion.length) {
+    throw new ApiError(
+      400,
+      "Season and occasion are required"
+    );
   }
 
-  // 6️⃣ VALIDATION FOR NON-ACCESSORY ITEMS
-  if (type !== "accessory") {
-    if (!season.length || !occasion.length) {
-      throw new ApiError(
-        400,
-        "Season and occasion are required for non-accessory items"
-      );
-    }
-  }
-
-  // 7️⃣ Upload image
+  // 6️⃣ Upload image
   const uploadResult = await uploadOnCloudinary(req.file.path);
   if (!uploadResult) {
     throw new ApiError(500, "Image upload failed");
   }
 
-  // 8️⃣ Create clothing item
+  // 7️⃣ Create clothing item
   const item = await ClothingItem.create({
     owner: req.user._id,
     type,
@@ -161,4 +153,4 @@ const deleteClothingItem = asyncHandler(async (req, res) => {
 
 
 
-export { addClothingItem,getClothingItems,getClothingItemById,deleteClothingItem};
+export { addClothingItem, getClothingItems, getClothingItemById, deleteClothingItem };
