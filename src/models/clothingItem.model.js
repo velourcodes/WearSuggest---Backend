@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+  import mongoose from "mongoose";
 
 const clothingItemSchema = new mongoose.Schema(
     {
@@ -16,12 +16,12 @@ const clothingItemSchema = new mongoose.Schema(
             index: true,
         },
 
-        color: {
+        colour: {
             type: String,
             required: true,
         },
 
-        colorTone: {
+        colourTone: {
             type: String,
             enum: ["light", "dark", "neutral"],
             required: true,
