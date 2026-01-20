@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+  import mongoose from "mongoose";
 
 const clothingItemSchema = new mongoose.Schema(
   {
@@ -36,4 +36,4 @@ const clothingItemSchema = new mongoose.Schema(
 
 clothingItemSchema.index({ owner: 1, category: 1 });
 
-export default mongoose.model("ClothingItem", clothingItemSchema);
+export const clothingItem  =  mongoose.model("ClothingItem", clothingItemSchema);

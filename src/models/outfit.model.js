@@ -41,4 +41,4 @@ outfitSchema.index(
   { unique: true }
 );
 
-export default mongoose.model("Outfit", outfitSchema);
+export const Outfit =  mongoose.model("Outfit", outfitSchema);

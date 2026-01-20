@@ -213,9 +213,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             )
         );
 });
-const getAllSuggestedOutfits = asyncHandler(async (req, res) => {
-
-});
 
 export {
     registerUser,
@@ -224,5 +221,4 @@ export {
     refreshAccessToken,
     updatePassword,
     getCurrentUser,
-    getAllSuggestedOutfits,
 };
