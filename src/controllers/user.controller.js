@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 const options = {
     httpOnly: true,
     secure: true,
+    sameSite: "None",
 };
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -140,7 +141,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    console.log("refreshAccessToken hit")
+    console.log("refreshAccessToken hit");
     const incomingRefreshToken =
         req.cookies.refreshToken || req.body.refreshToken;
 
@@ -164,7 +165,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     user.refreshToken = refreshToken;
     user.save({ validateBeforeSave: false });
-
 
     return res
         .status(200)
@@ -197,7 +197,7 @@ const updatePassword = asyncHandler(async (req, res) => {
 
 const getCurrentUser = asyncHandler(async (req, res) => {
     const currentUser = req.user?.toObject();
-    delete currentUser.outfits
+    delete currentUser.outfits;
     // Tho this req.user is an object as per typeof but, it is a special object not a plain JS obj, it is verified when i checked with .$__ hence without toObject(), deletion didnt work
 
     if (!currentUser) throw new ApiError(404, "User not found");
