@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { generateOutfit } from "../services/outfit/outfitAssembler.service.js";
+import { generateOutfit, generateToneBasedOutfit } from "../services/outfit/outfitAssembler.service.js";
 import { Outfit } from "../models/outfit.model.js";
 
 const suggestOutfit = asyncHandler(async (req, res) => {
@@ -20,6 +20,25 @@ const suggestOutfit = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, outfit, "Outfit suggested successfully"));
+});
+
+const suggestToneBasedOutfit = asyncHandler(async (req, res) => {
+  const { occasion, season, tone } = req.body;
+
+  if (!occasion || !tone) {
+    throw new ApiError(400, "Occasion and Tone are required");
+  }
+
+  const outfit = await generateToneBasedOutfit({
+    userId: req.user._id,
+    occasion,
+    season,
+    tone
+  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, outfit, `Outfit in ${tone} tone suggested successfully`));
 });
 
 const getRecentOutfits = asyncHandler(async (req, res) => {
@@ -42,4 +61,4 @@ const getRecentOutfits = asyncHandler(async (req, res) => {
 });
 
 
-export { suggestOutfit, getRecentOutfits };
+export { suggestOutfit, suggestToneBasedOutfit, getRecentOutfits };

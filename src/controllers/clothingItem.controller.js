@@ -8,28 +8,36 @@ import { generateClothingMetadata } from "../services/ai/tagging.service.js";
 import mongoose from "mongoose";
 import fs from "fs";
 
+const analyzeClothingImage = asyncHandler(async (req, res) => {
+    if (!req.file) throw new ApiError(400, "Image is required for analysis");
+
+    try {
+        const imageBuffer = fs.readFileSync(req.file.path);
+        const aiMetadata = await generateClothingMetadata(imageBuffer, req.file.mimetype);
+
+        if (!aiMetadata) {
+            throw new ApiError(500, "Failed to analyze image");
+        }
+
+        // Clean up the temp file since we only needed it for analysis
+        // In a real prod env, we might stream to memory instead of disk upload for this
+        // but since upload middleware saves it, we can keep it or let OS clean temp
+        // Actually, multer DiskStorage saves it. Ideally we delete it if not saving item yet.
+        // For simplicity in this flow, we'll let it persist or user will re-upload for add.
+        // Or if we want to be strict: fs.unlinkSync(req.file.path); 
+
+        return res.status(200).json(new ApiResponse(200, aiMetadata, "Image analyzed successfully"));
+    } catch (error) {
+        console.error("AI Analysis Failed:", error);
+        throw new ApiError(500, "AI analysis failed");
+    }
+});
+
 const addClothingItem = asyncHandler(async (req, res) => {
     let { type, category, color, season, occasion } = req.body;
     let colorGroup;
 
     if (!req.file) throw new ApiError(400, "Image is required");
-
-    if (!type || !category || !color) {
-        try {
-            const imageBuffer = fs.readFileSync(req.file.path);
-            const aiMetadata = await generateClothingMetadata(imageBuffer, req.file.mimetype);
-
-            if (aiMetadata) {
-                type = type || aiMetadata.type;
-                category = category || aiMetadata.category;
-                color = color || aiMetadata.color;
-                season = season || aiMetadata.season;
-                occasion = occasion || aiMetadata.occasion;
-            }
-        } catch (error) {
-            console.error("AI Tagging Failed:", error.message);
-        }
-    }
 
     if (!type || !category || !color) {
         throw new ApiError(400, "Type, category and color are required");
@@ -191,4 +199,5 @@ export {
     restoreClothingItem,
     getClothingItemById,
     deleteClothingItem,
+    analyzeClothingImage
 };

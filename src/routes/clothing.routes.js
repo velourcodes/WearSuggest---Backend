@@ -1,16 +1,23 @@
 import { Router } from "express";
-import { addClothingItem, getClothingItems, getClothingItemById, deleteClothingItem, getDeletedClothingItems, restoreClothingItem } from "../controllers/clothingItem.controller.js";
+import { addClothingItem, getClothingItems, getClothingItemById, deleteClothingItem, getDeletedClothingItems, restoreClothingItem, analyzeClothingImage } from "../controllers/clothingItem.controller.js";
 import { JWTVerify } from "../middleware/auth.middleware.js";
 import { upload } from "../middleware/multer.middleware.js";
 
 const router = Router();
 
-router.post(
-  "/",
+router.route("/analyze").post(
+  JWTVerify,
+  upload.single("itemImage"),
+  analyzeClothingImage
+);
+
+
+router.route("/").post(
   JWTVerify,
   upload.single("itemImage"),
   addClothingItem
 );
+
 router.get(
   "/",
   JWTVerify,

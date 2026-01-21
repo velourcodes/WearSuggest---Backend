@@ -135,3 +135,75 @@ export const generateOutfit = async ({ userId, occasion, season }) => {
     note: "Only one possible outfit available",
   };
 };
+
+export const generateToneBasedOutfit = async ({ userId, occasion, season, tone }) => {
+  // 1️⃣ Fetch active clothing
+  const items = await ClothingItem.find({
+    owner: userId,
+    isActive: true,
+  });
+
+  if (!items.length) {
+    throw new ApiError(400, "No clothing items found");
+  }
+
+  // 2️⃣ Apply Filters (Season & Occasion)
+  // Reuse existing logic
+  let filtered = filterByOccasion(items, occasion);
+  filtered = filterBySeason(filtered, season);
+
+  // 3️⃣ Apply Tone Filter
+  // Filter items that match the requested colorGroup (tone)
+  const tonedItems = filtered.filter(i => i.colorGroup === tone);
+
+  const tops = tonedItems.filter(i => i.type === "top");
+  const bottoms = tonedItems.filter(i => i.type === "bottom");
+  const footwear = tonedItems.filter(i => i.type === "footwear");
+  const outerwear = tonedItems.filter(i => i.type === "outerwear");
+  const accessories = tonedItems.filter(i => i.type === "accessory");
+
+  if (!tops.length || !bottoms.length || !footwear.length) {
+    throw new ApiError(400, `Not enough '${tone}' items to form an outfit for ${season}/${occasion}`);
+  }
+
+  // 4️⃣ Select Random Items (No logic/rules, just random from the filtered tone pool)
+  const selectedTop = pickRandom(tops);
+  const selectedBottom = pickRandom(bottoms);
+  const selectedFootwear = pickRandom(footwear);
+
+  // Optional items
+  const selectedAccessories = pickRandomAccessories(accessories);
+  const selectedOuterwear = outerwear.length ? pickRandom(outerwear) : null;
+
+  const now = new Date();
+
+  // 5️⃣ Save/Update Outfit Logic (Reused from standard generator)
+  await Outfit.findOneAndUpdate(
+    {
+      owner: userId,
+      top: selectedTop._id,
+      bottom: selectedBottom._id,
+    },
+    {
+      $set: {
+        lastWornAt: now,
+        accessories: selectedAccessories.map(a => a._id),
+        footwear: selectedFootwear._id,
+        outerwear: selectedOuterwear ? selectedOuterwear._id : null
+      },
+    },
+    {
+      upsert: true,
+      new: true,
+    }
+  );
+
+  return {
+    top: selectedTop,
+    bottom: selectedBottom,
+    footwear: selectedFootwear,
+    outerwear: selectedOuterwear,
+    accessories: selectedAccessories,
+    note: `Generated based on ${tone} tone preference`,
+  };
+};
