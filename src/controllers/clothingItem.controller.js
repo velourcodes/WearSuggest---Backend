@@ -23,6 +23,9 @@ const analyzeClothingImage = asyncHandler(async (req, res) => {
         console.error("AI Analysis Failed:", error);
         throw new ApiError(500, "AI analysis failed");
     }
+    finally {
+        fs.unlinkSync(req.file.path);
+    }
 });
 
 const addClothingItem = asyncHandler(async (req, res) => {
